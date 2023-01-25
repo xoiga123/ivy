@@ -67,34 +67,10 @@ def _array_idxes_n_dtype(draw, **kwargs):
 # cat
 @handle_frontend_test(
     fn_tree="torch.cat",
+    aliases=["torch.concat", "torch.concatenate"],
     xs_n_input_dtypes_n_unique_idx=_arrays_idx_n_dtypes(),
 )
 def test_torch_cat(
-    *,
-    xs_n_input_dtypes_n_unique_idx,
-    on_device,
-    fn_tree,
-    frontend,
-    test_flags,
-):
-    xs, input_dtypes, unique_idx = xs_n_input_dtypes_n_unique_idx
-    helpers.test_frontend_function(
-        input_dtypes=input_dtypes,
-        frontend=frontend,
-        test_flags=test_flags,
-        fn_tree=fn_tree,
-        on_device=on_device,
-        tensors=xs,
-        dim=unique_idx,
-    )
-
-
-# concat
-@handle_frontend_test(
-    fn_tree="torch.concat",
-    xs_n_input_dtypes_n_unique_idx=_arrays_idx_n_dtypes(),
-)
-def test_torch_concat(
     *,
     xs_n_input_dtypes_n_unique_idx,
     on_device,

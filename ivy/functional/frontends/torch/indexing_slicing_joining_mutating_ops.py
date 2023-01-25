@@ -8,6 +8,10 @@ def cat(tensors, dim=0, *, out=None):
     return ivy.concat(tensors, axis=dim, out=out)
 
 
+concat = cat
+concatenate = cat
+
+
 @to_ivy_arrays_and_back
 def chunk(input, chunks, dim=0):
     if ivy.shape(input) == ():
@@ -29,11 +33,6 @@ def chunk(input, chunks, dim=0):
                     ),
                     axis=dim,
                 )
-
-
-@to_ivy_arrays_and_back
-def concat(tensors, dim=0, *, out=None):
-    return ivy.concat(tensors, axis=dim, out=out)
 
 
 @to_ivy_arrays_and_back
