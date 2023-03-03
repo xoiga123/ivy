@@ -168,7 +168,8 @@ def matmul(
     adjoint_b: bool = False,
     out: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-
+    # if x1 is out:
+    #     x1 = x1.clone()
     if transpose_a:
         x1 = torch.t(x1)
     if transpose_b:
