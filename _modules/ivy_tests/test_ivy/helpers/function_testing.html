@@ -585,6 +585,7 @@
 <span class="kn">import</span> <span class="nn">types</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">jsonpickle</span>
@@ -1693,8 +1694,8 @@
         <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">init_flags</span><span class="o">.</span><span class="n">as_variable</span><span class="p">,</span> <span class="n">init_input_dtypes</span><span class="p">)</span>
     <span class="p">]</span>
 
-    <span class="c1"># Create Args</span>
-    <span class="n">args_constructor</span><span class="p">,</span> <span class="n">kwargs_constructor</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">create_args_kwargs</span><span class="p">(</span>
+    <span class="c1"># Save original constructor data for inplace operations</span>
+    <span class="n">con_data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span>
         <span class="n">args_np</span><span class="o">=</span><span class="n">args_np_constructor</span><span class="p">,</span>
         <span class="n">arg_np_vals</span><span class="o">=</span><span class="n">con_arg_np_vals</span><span class="p">,</span>
         <span class="n">args_idxs</span><span class="o">=</span><span class="n">con_args_idxs</span><span class="p">,</span>
@@ -1705,6 +1706,10 @@
         <span class="n">test_flags</span><span class="o">=</span><span class="n">init_flags</span><span class="p">,</span>
         <span class="n">on_device</span><span class="o">=</span><span class="n">on_device</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">org_con_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">con_data</span><span class="p">)</span>
+
+    <span class="c1"># Create Args</span>
+    <span class="n">args_constructor</span><span class="p">,</span> <span class="n">kwargs_constructor</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">create_args_kwargs</span><span class="p">(</span><span class="o">**</span><span class="n">con_data</span><span class="p">)</span>
     <span class="c1"># end constructor #</span>
 
     <span class="c1"># method arguments #</span>
@@ -1790,14 +1795,8 @@
         <span class="n">process</span> <span class="o">=</span> <span class="n">ground_truth_backend</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">args_np_constructor</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">con_arg_np_vals</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">con_args_idxs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">kwargs_np_constructor</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">con_kwarg_np_vals</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">con_kwargs_idxs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">init_input_dtypes</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">init_flags</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">org_con_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">args_np_method</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">met_arg_np_vals</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jsonpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">met_args_idxs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1833,15 +1832,7 @@
         <span class="n">ivy</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">ground_truth_backend</span><span class="p">)</span>
         <span class="n">ivy</span><span class="o">.</span><span class="n">set_default_device</span><span class="p">(</span><span class="n">on_device</span><span class="p">)</span>
         <span class="n">args_gt_constructor</span><span class="p">,</span> <span class="n">kwargs_gt_constructor</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">create_args_kwargs</span><span class="p">(</span>
-            <span class="n">args_np</span><span class="o">=</span><span class="n">args_np_constructor</span><span class="p">,</span>
-            <span class="n">arg_np_vals</span><span class="o">=</span><span class="n">con_arg_np_vals</span><span class="p">,</span>
-            <span class="n">args_idxs</span><span class="o">=</span><span class="n">con_args_idxs</span><span class="p">,</span>
-            <span class="n">kwargs_np</span><span class="o">=</span><span class="n">kwargs_np_constructor</span><span class="p">,</span>
-            <span class="n">kwarg_np_vals</span><span class="o">=</span><span class="n">con_kwarg_np_vals</span><span class="p">,</span>
-            <span class="n">kwargs_idxs</span><span class="o">=</span><span class="n">con_kwargs_idxs</span><span class="p">,</span>
-            <span class="n">input_dtypes</span><span class="o">=</span><span class="n">init_input_dtypes</span><span class="p">,</span>
-            <span class="n">test_flags</span><span class="o">=</span><span class="n">init_flags</span><span class="p">,</span>
-            <span class="n">on_device</span><span class="o">=</span><span class="n">on_device</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">org_con_data</span>
         <span class="p">)</span>
         <span class="n">args_gt_method</span><span class="p">,</span> <span class="n">kwargs_gt_method</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">create_args_kwargs</span><span class="p">(</span>
             <span class="n">args_np</span><span class="o">=</span><span class="n">args_np_method</span><span class="p">,</span>
